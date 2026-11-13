@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Roster Mengawas Ujian</title>
+<style>
+:root{--utama:#2457a7;--gelap:#173b73;--latar:#f3f6fb;--garis:#dce3ee;--teks:#243247;--merah:#b42318;--hijau:#16794b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--latar);font-family:Arial,Helvetica,sans-serif;color:var(--teks);line-height:1.5}
+header{background:linear-gradient(120deg,var(--gelap),var(--utama));color:white;padding:28px 18px}
+header .isi{max-width:1100px;margin:auto}
+h1{margin:0 0 5px;font-size:27px}
+header p{margin:0;color:#e4edff}
+main{max-width:1100px;margin:22px auto;padding:0 16px 40px}
+.panel{background:white;border:1px solid var(--garis);border-radius:12px;padding:20px;margin-bottom:18px;box-shadow:0 3px 12px #203b6410}
+h2{font-size:19px;margin:0 0 15px;color:var(--gelap)}
+h3{font-size:16px;margin:0 0 10px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.grid.tiga{grid-template-columns:repeat(3,minmax(0,1fr))}
+label{display:block;font-weight:700;font-size:13px;margin-bottom:6px}
+input,textarea,select{width:100%;padding:10px 11px;border:1px solid #cbd5e1;border-radius:8px;font:inherit;color:var(--teks);background:white}
+textarea{min-height:145px;resize:vertical}
+input:focus,textarea:focus{outline:2px solid #b9d1fa;border-color:var(--utama)}
+.bantuan{font-size:12px;color:#64748b;margin-top:5px}
+.tombol{display:flex;flex-wrap:wrap;gap:9px;margin-top:15px}
+button{border:0;border-radius:8px;padding:11px 16px;font-weight:700;cursor:pointer;font-size:14px}
+.primer{background:var(--utama);color:white}
+.sekunder{background:#e8eef8;color:var(--gelap)}
+.cetak{background:#16794b;color:white}
+button:hover{filter:brightness(.96)}
+.pesan{padding:12px 14px;border-radius:8px;margin:12px 0;font-size:14px}
+.info{background:#edf4ff;color:#194b91}
+.gagal{background:#fff0ef;color:var(--merah)}
+.sukses{background:#eaf8f0;color:#146c43}
+.kecil{font-size:12px;color:#64748b}
+.tabel-bungkus{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:650px}
+th,td{padding:10px 11px;border-bottom:1px solid var(--garis);text-align:left;vertical-align:top;font-size:13px}
+th{background:#f0f4fa;color:#29466f}
+.tag{display:inline-block;background:#eaf1fc;color:#214f91;border-radius:20px;padding:3px 8px;margin:2px;font-size:12px}
+.ringkasan{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.kartu{background:#f5f8fd;border:1px solid var(--garis);border-radius:9px;padding:12px}
+.kartu strong{display:block;font-size:22px;color:var(--gelap)}
+.kartu span{font-size:12px;color:#64748b}
+@media(max-width:700px){.grid,.grid.tiga{grid-template-columns:1fr}.ringkasan{grid-template-columns:1fr}h1{font-size:23px}.panel{padding:15px}}
+@media print{
+ body{background:white}header{background:white;color:#111;padding:10px 0;border-bottom:2px solid #333}
+ header p{color:#333}main{max-width:none;margin:10px 0;padding:0}
+ .panel{box-shadow:none;border:0;padding:8px 0;margin:0 0 12px}
+ .no-cetak, #pengaturan, #masukan{display:none!important}
+ h2{color:#111}th{background:#eee!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+<header>
+ <div class="isi">
+  <h1>Roster Mengawas Ujian</h1>
+  <p>Aplikasi pembagian jadwal pengawas ujian secara otomatis, seimbang, dan tanpa bentrok waktu.</p>
+ </div>
+</header>
+<main>
+ <section class="panel" id="masukan">
+  <h2>1. Data Guru dan Mata Pelajaran</h2>
+  <div class="grid">
+   <div>
+    <label for="daftarGuru">Nama-nama Guru</label>
+    <textarea id="daftarGuru" placeholder="Contoh:&#10;Budi Santoso&#10;Siti Aminah&#10;Andi Saputra&#10;Rina Lestari"></textarea>
+    <div class="bantuan">Tuliskan satu nama guru pada setiap baris. Hindari nama yang sama.</div>
+   </div>
+   <div>
+    <label for="daftarMapel">Mata Pelajaran dan Guru Pengampu</label>
+    <textarea id="daftarMapel" placeholder="Contoh:&#10;Matematika | Budi Santoso&#10;Bahasa Indonesia | Siti Aminah&#10;Pemrograman Web | Andi Saputra&#10;Bahasa Inggris | Rina Lestari"></textarea>
+    <div class="bantuan">Format: Nama Mata Pelajaran | Nama Guru Pengampu. Jika lebih dari satu guru, pisahkan dengan koma.</div>
+   </div>
+  </div>
+ </section>
+
+ <section class="panel" id="pengaturan">
+  <h2>2. Pengaturan Waktu Ujian</h2>
+  <div class="grid tiga">
+   <div style="grid-column:1/-1"><label for="daftarTanggal">Tanggal-tanggal Ujian</label><textarea id="daftarTanggal" style="min-height:105px" placeholder="2026-11-16&#10;2026-11-18&#10;2026-11-20"></textarea><div class="bantuan">Masukkan satu tanggal pada setiap baris dengan format Tahun-Bulan-Tanggal (YYYY-MM-DD). Boleh ada jeda hari, misalnya Senin, Rabu, dan Jumat.</div></div>
+   <div><label for="jamMasuk">Jam Masuk / Mulai Ujian</label><input type="time" id="jamMasuk" value="07:30"></div>
+   <div><label for="durasi">Durasi Setiap Ujian (menit)</label><input type="number" id="durasi" min="1" value="90"></div>
+   <div><label for="jamIstirahat">Jam Mulai Istirahat</label><input type="time" id="jamIstirahat" value="10:00"></div>
+   <div><label for="selesaiIstirahat">Jam Selesai Istirahat</label><input type="time" id="selesaiIstirahat" value="10:30"></div>
+   <div><label for="jamPulang">Jam Pulang / Batas Akhir</label><input type="time" id="jamPulang" value="13:00"></div>
+   <div><label for="jumlahPengawas">Jumlah Pengawas per Sesi</label><input type="number" id="jumlahPengawas" min="1" value="2"></div>
+  </div>
+  <div class="pesan info">Jadwal mata pelajaran dibuat berurutan sesuai daftar dan dibagikan ke tanggal-tanggal yang Anda masukkan. Jika satu hari sudah melewati jam pulang, mata pelajaran berikutnya dijadwalkan pada tanggal ujian berikutnya. Jika waktu ujian melewati jam istirahat, sesi akan dilanjutkan setelah istirahat.</div>
+  <div class="tombol">
+   <button class="primer" id="buatRoster">Buat Roster Otomatis</button>
+   <button class="sekunder" id="simpanData">Simpan Data di Perangkat</button>
+   <button class="sekunder" id="muatData">Muat Data Tersimpan</button>
+   <button class="sekunder" id="hapusData">Kosongkan Form</button>
+  </div>
+  <div id="pesan" aria-live="polite"></div>
+ </section>
+
+ <section class="panel" id="hasil" style="display:none">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+   <div><h2 style="margin-bottom:3px">3. Hasil Roster Mengawas</h2><div id="judulTanggal" class="kecil"></div></div>
+   <div class="tombol no-cetak" style="margin:0">
+    <button class="cetak" id="cetakRoster">Cetak / Simpan PDF</button>
+   </div>
+  </div>
+  <div id="ringkasan" class="ringkasan"></div>
+  <div id="peringatan"></div>
+  <h3>Jadwal Pengawas per Sesi</h3>
+  <div class="tabel-bungkus">
+   <table>
+    <thead><tr><th>No.</th><th>Tanggal</th><th>Mata Pelajaran</th><th>Waktu Ujian</th><th>Durasi</th><th>Nama Pengawas</th></tr></thead>
+    <tbody id="isiRoster"></tbody>
+   </table>
+  </div>
+  <h3 style="margin-top:22px">Rekap Beban Mengawas Guru</h3>
+  <div class="tabel-bungkus">
+   <table>
+    <thead><tr><th>No.</th><th>Nama Guru</th><th>Jumlah Sesi</th><th>Total Waktu</th></tr></thead>
+    <tbody id="rekapGuru"></tbody>
+   </table>
+  </div>
+  <p class="kecil">Catatan: Guru yang mengampu mata pelajaran pada sesi tersebut tidak akan dipilih sebagai pengawas sesi itu.</p>
+ </section>
+ <p class="kecil no-cetak" style="text-align:center">Roster Mengawas Ujian • Data tersimpan hanya di perangkat yang digunakan.</p>
+</main>
+<script>
+// Mengambil elemen halaman berdasarkan identitasnya.
+const elemen = id => document.getElementById(id);
+
+// Mengubah jam menjadi jumlah menit sejak tengah malam.
+function keMenit(jam){
+ const bagian = jam.split(":").map(Number);
+ return bagian[0] * 60 + bagian[1];
+}
+
+// Mengubah jumlah menit menjadi tampilan jam.
+function keJam(menit){
+ const jam = Math.floor(menit / 60) % 24;
+ const sisa = menit % 60;
+ return String(jam).padStart(2,"0") + ":" + String(sisa).padStart(2,"0");
+}
+
+// Menampilkan pesan kepada pengguna.
+function tampilPesan(teks, jenis="info"){
+ elemen("pesan").innerHTML = `<div class="pesan ${jenis}">${teks}</div>`;
+}
+
+// Mengambil daftar guru dari kotak teks.
+function ambilGuru(){
+ return [...new Set(elemen("daftarGuru").value.split(/\r?\n/).map(n=>n.trim()).filter(Boolean))];
+}
+
+// Membaca mata pelajaran beserta guru pengampunya.
+function ambilMapel(){
+ const baris = elemen("daftarMapel").value.split(/\r?\n/).map(b=>b.trim()).filter(Boolean);
+ return baris.map((b,i)=>{
+  const bagian = b.split("|");
+  if(bagian.length < 2) throw new Error(`Baris mata pelajaran ke-${i+1} belum memakai format "Mata Pelajaran | Nama Guru".`);
+  const nama = bagian[0].trim();
+  const pengampu = bagian.slice(1).join("|").split(",").map(n=>n.trim().toLocaleLowerCase("id")).filter(Boolean);
+  if(!nama) throw new Error(`Nama mata pelajaran pada baris ke-${i+1} masih kosong.`);
+  return {nama,pengampu};
+ });
+}
+
+// Menyusun sesi ujian pada beberapa tanggal, termasuk tanggal yang memiliki jeda hari.
+function susunJadwal(mapel, tanggalUjian, mulai, durasi, istirahatMulai, istirahatSelesai, pulang){
+ const jadwal=[];
+ let indeksTanggal=0;
+ let waktu=mulai;
+
+ for(const item of mapel){
+  let berhasil=false;
+  while(indeksTanggal < tanggalUjian.length && !berhasil){
+   if(waktu < istirahatSelesai && waktu + durasi > istirahatMulai){
+    waktu=istirahatSelesai;
+   }
+   const akhir=waktu+durasi;
+   if(akhir <= pulang){
+    jadwal.push({...item,tanggal:tanggalUjian[indeksTanggal],mulai:waktu,akhir});
+    waktu=akhir;
+    berhasil=true;
+   }else{
+    indeksTanggal++;
+    waktu=mulai;
+   }
+  }
+  if(!berhasil){
+   throw new Error(`Tanggal ujian yang disediakan belum cukup untuk semua mata pelajaran. Mata pelajaran "${item.nama}" belum mendapat jadwal. Tambahkan tanggal ujian atau sesuaikan durasi/jam pulang.`);
+  }
+ }
+ return jadwal;
+}
+
+// Membuat pembagian pengawas dengan mempertimbangkan larangan mengawas dan beban kerja.
+function bagiPengawas(jadwal, guru, jumlah){
+ const jumlahSesi=Object.fromEntries(guru.map(n=>[n,0]));
+ const totalMenit=Object.fromEntries(guru.map(n=>[n,0]));
+ const terakhir=Object.fromEntries(guru.map(n=>[n,-2]));
+ const hasil=[];
+ const masalah=[];
+
+ jadwal.forEach((sesi, indeks)=>{
+  const pengampu=new Set(sesi.pengampu);
+  const tersedia=guru.filter(n=>
+   !pengampu.has(n.toLocaleLowerCase("id")) &&
+   !(hasil.some(h=>h.pengawas.includes(n) && h.mulai < sesi.akhir && sesi.mulai < h.akhir))
+  );
+  // Prioritaskan guru dengan jumlah sesi dan total menit paling sedikit.
+  tersedia.sort((a,b)=>
+   (jumlahSesi[a]-jumlahSesi[b]) ||
+   (totalMenit[a]-totalMenit[b]) ||
+   (terakhir[a]-terakhir[b]) ||
+   a.localeCompare(b,"id")
+  );
+  const terpilih=tersedia.slice(0,jumlah);
+  if(terpilih.length < jumlah){
+   masalah.push(`Sesi ${indeks+1} (${sesi.nama}): hanya tersedia ${terpilih.length} dari ${jumlah} pengawas yang dibutuhkan.`);
+  }
+  terpilih.forEach(n=>{
+   jumlahSesi[n]++;
+   totalMenit[n]+=sesi.akhir-sesi.mulai;
+   terakhir[n]=indeks;
+  });
+  hasil.push({...sesi,pengawas:terpilih});
+ });
+ return {hasil,jumlahSesi,totalMenit,masalah};
+}
+
+// Memproses seluruh masukan dan menampilkan roster.
+function buatRoster(){
+ try{
+  const guru=ambilGuru();
+  const mapel=ambilMapel();
+  const tanggalUjian=elemen("daftarTanggal").value.split(/\r?\n/).map(t=>t.trim()).filter(Boolean);
+  const durasi=Number(elemen("durasi").value);
+  const jumlah=Number(elemen("jumlahPengawas").value);
+  const mulai=keMenit(elemen("jamMasuk").value);
+  const istirahatMulai=keMenit(elemen("jamIstirahat").value);
+  const istirahatSelesai=keMenit(elemen("selesaiIstirahat").value);
+  const pulang=keMenit(elemen("jamPulang").value);
+
+  if(guru.length<1) throw new Error("Masukkan minimal satu nama guru.");
+  if(mapel.length<1) throw new Error("Masukkan minimal satu mata pelajaran.");
+  if(tanggalUjian.length<1) throw new Error("Masukkan minimal satu tanggal ujian.");
+  if(tanggalUjian.some(t=>!/^\d{4}-\d{2}-\d{2}$/.test(t) || Number.isNaN(Date.parse(t+"T00:00:00")))) throw new Error("Format tanggal harus YYYY-MM-DD, misalnya 2026-11-16.");
+  if(new Set(tanggalUjian).size!==tanggalUjian.length) throw new Error("Ada tanggal ujian yang dimasukkan lebih dari satu kali.");
+  if(tanggalUjian.some((t,i)=>i>0 && t<tanggalUjian[i-1])) throw new Error("Urutkan tanggal ujian dari tanggal paling awal ke paling akhir.");
+  if(!Number.isInteger(durasi)||durasi<1) throw new Error("Durasi ujian harus berupa angka lebih dari 0.");
+  if(!Number.isInteger(jumlah)||jumlah<1) throw new Error("Jumlah pengawas harus minimal 1.");
+  if(jumlah>guru.length) throw new Error("Jumlah pengawas melebihi jumlah seluruh guru.");
+  if(new Set(guru.map(n=>n.toLocaleLowerCase("id"))).size!==guru.length) throw new Error("Ada nama guru yang tercatat lebih dari satu kali.");
+  if(!(mulai<istirahatMulai && istirahatMulai<istirahatSelesai && istirahatSelesai<pulang)) throw new Error("Periksa urutan waktu: jam masuk, mulai istirahat, selesai istirahat, lalu jam pulang.");
+  const namaGuru=new Set(guru.map(n=>n.toLocaleLowerCase("id")));
+  mapel.forEach(m=>m.pengampu.forEach(p=>{
+   if(!namaGuru.has(p)) throw new Error(`Nama guru pengampu "${p}" pada mata pelajaran ${m.nama} tidak ditemukan dalam daftar guru.`);
+  }));
+
+  const jadwal=susunJadwal(mapel,tanggalUjian,mulai,durasi,istirahatMulai,istirahatSelesai,pulang);
+  const hasil=bagiPengawas(jadwal,guru,jumlah);
+  tampilkanHasil(hasil,guru);
+  tampilPesan("Roster berhasil dibuat. Periksa kembali hasil pembagian sebelum digunakan.", "sukses");
+ }catch(error){
+  elemen("hasil").style.display="none";
+  tampilPesan(error.message,"gagal");
+ }
+}
+
+// Menampilkan tabel roster dan rekap beban guru.
+function tampilkanHasil(data,guru){
+ elemen("hasil").style.display="block";
+ const totalSesi=data.hasil.length;
+ const daftarTanggalUnik=[...new Set(data.hasil.map(s=>s.tanggal))];
+ elemen("judulTanggal").textContent="Jadwal berlangsung pada "+daftarTanggalUnik.map(t=>new Date(t+"T00:00:00").toLocaleDateString("id-ID",{day:"numeric",month:"long",year:"numeric"})).join(", ");
+ const terisi=data.hasil.filter(s=>s.pengawas.length>0).length;
+ const totalTugas=data.hasil.reduce((a,s)=>a+s.pengawas.length,0);
+ elemen("ringkasan").innerHTML=`
+  <div class="kartu"><strong>${totalSesi}</strong><span>Jumlah sesi ujian</span></div>
+  <div class="kartu"><strong>${daftarTanggalUnik.length}</strong><span>Jumlah hari ujian</span></div>
+  <div class="kartu"><strong>${totalTugas}</strong><span>Total penugasan pengawas</span></div>`;
+ elemen("peringatan").innerHTML=data.masalah.length
+  ? `<div class="pesan gagal"><b>Perlu diperiksa:</b><br>${data.masalah.map(m=>"• "+m).join("<br>")}<br>Tambahkan guru yang tersedia atau kurangi jumlah pengawas per sesi.</div>`
+  : `<div class="pesan sukses">Semua sesi telah mendapatkan jumlah pengawas sesuai pengaturan.</div>`;
+
+ elemen("isiRoster").innerHTML=data.hasil.map((s,i)=>`
+  <tr><td>${i+1}</td><td>${new Date(s.tanggal+"T00:00:00").toLocaleDateString("id-ID",{day:"numeric",month:"short",year:"numeric"})}</td><td><b>${aman(s.nama)}</b></td>
+  <td>${keJam(s.mulai)} – ${keJam(s.akhir)}</td><td>${s.akhir-s.mulai} menit</td>
+  <td>${s.pengawas.length?s.pengawas.map(n=>`<span class="tag">${aman(n)}</span>`).join(""):"Belum ada pengawas"}</td></tr>`).join("");
+
+ const urut=[...guru].sort((a,b)=>(data.jumlahSesi[a]-data.jumlahSesi[b])||(data.totalMenit[a]-data.totalMenit[b])||a.localeCompare(b,"id"));
+ elemen("rekapGuru").innerHTML=urut.map((n,i)=>`
+  <tr><td>${i+1}</td><td>${aman(n)}</td><td>${data.jumlahSesi[n]} sesi</td><td>${data.totalMenit[n]} menit</td></tr>`).join("");
+}
+
+// Mencegah teks masukan dibaca sebagai kode HTML.
+function aman(teks){
+ return String(teks).replace(/[&<>"']/g,karakter=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[karakter]));
+}
+
+// Menyimpan isian di penyimpanan lokal peramban.
+function simpan(){
+ const data={};
+ ["daftarGuru","daftarMapel","daftarTanggal","jamMasuk","durasi","jamIstirahat","selesaiIstirahat","jamPulang","jumlahPengawas"].forEach(id=>data[id]=elemen(id).value);
+ localStorage.setItem("dataRosterMengawas",JSON.stringify(data));
+ tampilPesan("Data berhasil disimpan pada perangkat ini.","sukses");
+}
+
+// Memuat data yang pernah disimpan.
+function muat(){
+ const simpanan=localStorage.getItem("dataRosterMengawas");
+ if(!simpanan){tampilPesan("Belum ada data tersimpan pada perangkat ini.","gagal");return;}
+ const data=JSON.parse(simpanan);
+ Object.keys(data).forEach(id=>{if(elemen(id))elemen(id).value=data[id];});
+ tampilPesan("Data tersimpan berhasil dimuat.","sukses");
+}
+
+// Mengosongkan isian dan hasil roster.
+function kosongkan(){
+ if(!confirm("Apakah Anda yakin ingin mengosongkan seluruh isian?")) return;
+ ["daftarGuru","daftarMapel","daftarTanggal"].forEach(id=>elemen(id).value="");
+ elemen("hasil").style.display="none";
+ tampilPesan("Formulir telah dikosongkan.","info");
+}
+
+elemen("buatRoster").addEventListener("click",buatRoster);
+elemen("simpanData").addEventListener("click",simpan);
+elemen("muatData").addEventListener("click",muat);
+elemen("hapusData").addEventListener("click",kosongkan);
+elemen("cetakRoster").addEventListener("click",()=>window.print());
+</script>
+</body>
+</html>
